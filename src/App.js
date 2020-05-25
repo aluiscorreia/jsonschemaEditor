@@ -1,60 +1,90 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Form from 'react-jsonschema-form';
-import { ControlledEditor } from '@monaco-editor/react';
+import { Accordion, Card } from 'react-bootstrap';
+import Editor, { ControlledEditor } from '@monaco-editor/react';
+import { defaultSchema, schemaInfo } from './data'
 import './App.css';
 
-const defaultSchema = {
-  "title": "A registration form",
-  "description": "A simple form example.",
-  "type": "object",
-  "required": [
-    "firstName",
-    "lastName"
-  ],
-  "properties": {
-    "firstName": {
-      "type": "string",
-      "title": "First name"
-    },
-    "lastName": {
-      "type": "string",
-      "title": "Last name"
-    },
-    "age": {
-      "type": "integer",
-      "title": "Age"
-    },
-    "bio": {
-      "type": "string",
-      "title": "Bio"
-    },
-    "password": {
-      "type": "string",
-      "title": "Password",
-      "minLength": 3
-    },
-    "telephone": {
-      "type": "string",
-      "title": "Telephone",
-      "minLength": 10
-    }
+const isJSON = (str) => {
+  if (typeof (str) !== 'string') {
+    return false;
   }
-};
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 function App() {
   const [schema, setSchema] = useState(defaultSchema)
-  const [UISchema, setUISchema] = useState({})
-  const [formData, setFormData] = useState({})
+  const [UISchema, setUISchema] = useState("{}")
+  const [formData, setFormData] = useState("{}")
+
+  const handleEdits = (value, type) => {
+    switch (type) {
+      case "schema":
+        isJSON(value) && setSchema(value);
+        break;
+      case "uischema":
+        isJSON(value) && setUISchema(value);
+        break;
+      case "formdata":
+        isJSON(value) && setFormData(value);
+        break;
+    }
+  }
 
   return (
-    <div>
-      <main className="p-3">
+    <React.Fragment>
+      <main className="p-3 row">
         <Form
-          schema={schema}
-          formData={formData}
-          uiSchema={UISchema}
-          onChange={(event) => setFormData(event.formData)}
-          onError={console.log("errors")} />
+          className="col-7"
+          schema={JSON.parse(schema)}
+          formData={JSON.parse(formData)}
+          uiSchema={JSON.parse(UISchema)}
+          onChange={(event) => setFormData(JSON.stringify(event.formData))}
+          onError={console.error}
+        />
+        <aside className="col-5 h-100 position-fixed" style={{ right: 0 }}>
+          <Accordion defaultActiveKey="1">
+            <Card>
+              <Accordion.Toggle as={Card.Header} eventKey="0">
+                Documentação
+              </Accordion.Toggle>
+              <Accordion.Collapse eventKey="0">
+                <Card.Body>
+                  <ul>
+                    <li>
+                      Github: <a target="_blank" href="https://github.com/rjsf-team/react-jsonschema-form">https://github.com/rjsf-team/react-jsonschema-form</a>
+                    </li>
+                    <li>
+                      Docs: <a target="_blank" href="https://react-jsonschema-form.readthedocs.io/">https://react-jsonschema-form.readthedocs.io/</a>
+                    </li>
+                    <li>
+                      Playground:<a target="_blank" href="https://rjsf-team.github.io/react-jsonschema-form/">https://rjsf-team.github.io/react-jsonschema-form/</a>
+                    </li>
+                  </ul>
+                </Card.Body>
+              </Accordion.Collapse>
+            </Card>
+            <Card>
+              <Accordion.Toggle as={Card.Header} eventKey="1">
+                Schema Properties
+              </Accordion.Toggle>
+              <Accordion.Collapse eventKey="1">
+                <Editor
+                  height="430px"
+                  language="typescript"
+                  value={schemaInfo}
+                  options={{
+                    readOnly: true
+                  }} />
+              </Accordion.Collapse>
+            </Card>
+          </Accordion>
+        </aside>
       </main>
       <div className="fixed-bottom row">
         <section className="col">
@@ -62,8 +92,8 @@ function App() {
           <ControlledEditor
             height="100%"
             language="json"
-            value={JSON.stringify(schema)}
-            onChange={(_, value) => setSchema(JSON.parse(value))}
+            value={schema}
+            onChange={(_, value) => handleEdits(value, "schema")}
           />
         </section>
         <section className="col">
@@ -71,8 +101,8 @@ function App() {
           <ControlledEditor
             height="100%"
             language="json"
-            value={JSON.stringify(UISchema)}
-            onChange={(_, value) => setUISchema(JSON.parse(value))}
+            value={UISchema}
+            onChange={(_, value) => handleEdits(value, "uischema")}
           />
         </section>
         <section className="col">
@@ -80,12 +110,12 @@ function App() {
           <ControlledEditor
             height="100%"
             language="json"
-            value={JSON.stringify(formData)}
-            onChange={(_, value) => setFormData(JSON.parse(value))}
+            value={formData}
+            onChange={(_, value) => handleEdits(value, "formadata")}
           />
         </section>
       </div>
-    </div>
+    </React.Fragment>
   );
 }
 
