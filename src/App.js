@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Form from 'react-jsonschema-form';
 import { Accordion, Card } from 'react-bootstrap';
 import Editor, { ControlledEditor } from '@monaco-editor/react';
@@ -33,6 +33,8 @@ function App() {
       case "formdata":
         isJSON(value) && setFormData(value);
         break;
+      default:
+        break;
     }
   }
 
@@ -57,13 +59,13 @@ function App() {
                 <Card.Body>
                   <ul>
                     <li>
-                      Github: <a target="_blank" href="https://github.com/rjsf-team/react-jsonschema-form">https://github.com/rjsf-team/react-jsonschema-form</a>
+                      Github: <a target="_blank" rel="noopener noreferrer" href="https://github.com/rjsf-team/react-jsonschema-form">https://github.com/rjsf-team/react-jsonschema-form</a>
                     </li>
                     <li>
-                      Docs: <a target="_blank" href="https://react-jsonschema-form.readthedocs.io/">https://react-jsonschema-form.readthedocs.io/</a>
+                      Docs: <a target="_blank" rel="noopener noreferrer" href="https://react-jsonschema-form.readthedocs.io/">https://react-jsonschema-form.readthedocs.io/</a>
                     </li>
                     <li>
-                      Playground:<a target="_blank" href="https://rjsf-team.github.io/react-jsonschema-form/">https://rjsf-team.github.io/react-jsonschema-form/</a>
+                      Playground:<a target="_blank" rel="noopener noreferrer" href="https://rjsf-team.github.io/react-jsonschema-form/">https://rjsf-team.github.io/react-jsonschema-form/</a>
                     </li>
                   </ul>
                 </Card.Body>
