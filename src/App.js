@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import Form from 'react-jsonschema-form';
+// import Form from 'react-jsonschema-form';
+import Form from '@rjsf/core';
 import { Accordion, Card } from 'react-bootstrap';
 import Editor, { ControlledEditor } from '@monaco-editor/react';
-import { defaultSchema, schemaInfo } from './data'
+import { defaultSchemaJS, formDataJS, schemaInfo } from './data'
 import './App.css';
 
 const isJSON = (str) => {
@@ -18,9 +19,11 @@ const isJSON = (str) => {
 }
 
 function App() {
+  const defaultSchema = JSON.stringify(defaultSchemaJS)
+  const defaultData = JSON.stringify(formDataJS)
   const [schema, setSchema] = useState(defaultSchema)
   const [UISchema, setUISchema] = useState("{}")
-  const [formData, setFormData] = useState("{}")
+  const [formData, setFormData] = useState(defaultData) // useState("{}")
 
   const handleEdits = (value, type) => {
     switch (type) {
@@ -86,10 +89,20 @@ function App() {
               </Accordion.Collapse>
             </Card>
           </Accordion>
+          <div className="col" height="200px">
+            <h4>FormData</h4>
+            <ControlledEditor
+              border="blue solid 1px"
+              height="150px"
+              language="json"
+              value={formData}
+              onChange={(_, value) => handleEdits(value, "formadata")}
+            />
+          </div>
         </aside>
       </main>
-      <div className="fixed-bottom row">
-        <section className="col">
+      {/* <div className="fixed-bottom row">
+        {/* <section className="col">
           <h4>Schema</h4>
           <ControlledEditor
             height="100%"
@@ -116,7 +129,7 @@ function App() {
             onChange={(_, value) => handleEdits(value, "formadata")}
           />
         </section>
-      </div>
+      </div> */}
     </React.Fragment>
   );
 }

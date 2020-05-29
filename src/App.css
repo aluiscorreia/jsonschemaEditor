@@ -1,7 +1,7 @@
 @import "~bootstrap/dist/css/bootstrap.css";
 
 form, aside {
-  max-height: calc(100vh - 430px);
+  /* max-height: calc(100vh - 430px); */
   overflow-y: auto;
 }
 

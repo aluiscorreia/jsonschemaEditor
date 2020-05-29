@@ -1,41 +1,96 @@
-export const defaultSchema = 
-`{
-  "title": "A registration form",
-  "description": "A simple form example.",
+export const defaultSchemaJS = 
+{
+  "references": {
+    "alfaGeom": {
+
+    },
+    "geoList": {
+
+    }
+  },
+  "title": "Criação de conjunto de dados",
+  "description": "Formulário de apoio à criação de novo conjunto de dados",
   "type": "object",
   "required": [
-    "firstName",
-    "lastName"
+    
   ],
   "properties": {
-    "firstName": {
+    "description": {
       "type": "string",
-      "title": "First name"
+      "title": "Nome do conjunto de dados",
+      "maxlength": 60
     },
-    "lastName": {
+    "cod_table": {
       "type": "string",
-      "title": "Last name"
+      "title": "Código único",
+      "pattern": ""
     },
-    "age": {
-      "type": "integer",
-      "title": "Age"
-    },
-    "bio": {
+    "code_group": {
       "type": "string",
-      "title": "Bio"
+      "title": "Grupo a que pertence",
+      "enum": [
+        "A preencher"
+      ],
+      enumNames: [
+        "Label a preencher"
+      ]
     },
-    "password": {
+    "data_type": {
       "type": "string",
-      "title": "Password",
-      "minLength": 3
+      "title": "Tipo de conjunto de dados",
+      "enum": [
+        "alfa",
+        "algageom",
+        "vectorlist",
+        "rasterlist"
+      ],
+      "enumNames": [
+        "Dados alfanuméricos",
+        "Dados alfanuméricos e geográficos",
+        "Lista de temas vetoriais",
+        "Lista de temas raster"
+      ]
+    }, /*
+    create_order: {
+      type: "integer",
+      title: "Create Order? Por omissão fica o valor a seguir ao mais alto"
     },
-    "telephone": {
-      "type": "string",
-      "title": "Telephone",
-      "minLength": 10
+    order_in_group: {
+      type: "integer",
+      title: "Order in Group? Será depois definido - Por omissão fica o último"
+    },
+    z_index: {
+      type: "integer",
+      title: "zIndex? Por omissão fica o valor a seguir ao mais alto - hipótese de reordenar?"
+    }, */
+    json_schema: {
+      title: "Campos a incluir",
+      type: "array",
+      items: {
+        title: "Nome do campo",
+        type: "object",
+        properties: {
+          campo: {
+            title: "Campo",
+            type: "string"
+          },
+          type: {
+            title: "Tipo de campo",
+            type: "string"
+          }
+        }
+      }
     }
+
   }
-}`;
+};
+
+export const formDataJS = {
+  "description":"Conj. de dados",
+  "cod_table":"test1",
+  "code_group":"A preencher",
+  "data_type":"algageom"
+}
 
 export const schemaInfo =
 `// Type definitions for json-schema 4.0, 6.0 and 7.0
