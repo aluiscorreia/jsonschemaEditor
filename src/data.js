@@ -20,6 +20,16 @@ export const defaultSchemaJS =
       "title": "Nome do conjunto de dados",
       "maxlength": 60
     },
+    "testenumero": {
+      "type": "number",
+      "title": "Teste numeros"
+    },
+    "fieldA": {
+      "type": "number",
+       "default": 12,
+      //  "minimum": 0.0,
+      //  "maximum": 1.0
+  },
     "cod_table": {
       "type": "string",
       "title": "Código único",

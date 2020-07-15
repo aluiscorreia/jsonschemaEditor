@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 // import Form from 'react-jsonschema-form';
-import Form from '@rjsf/core';
+// import { withTheme } from 'react-jsonschema-form';
+import Form from 'react-jsonschema-form-bs4';
+// import Form from '@rjsf/core';
 import { Accordion, Card } from 'react-bootstrap';
 import Editor, { ControlledEditor } from '@monaco-editor/react';
 import { defaultSchemaJS, formDataJS, schemaInfo } from './data'
