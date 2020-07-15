@@ -1,60 +1,50 @@
 export const defaultSchemaJS = 
 {
-  "references": {
-    "alfaGeom": {
+  references: {
+    alfaGeom: {
 
     },
-    "geoList": {
+    geoList: {
 
     }
   },
-  "title": "Criação de conjunto de dados",
-  "description": "Formulário de apoio à criação de novo conjunto de dados",
-  "type": "object",
-  "required": [
+  title: "Criação de conjunto de dados",
+  description: "Formulário de apoio à criação de novo conjunto de dados",
+  type: "object",
+  required: [
     
   ],
-  "properties": {
-    "description": {
-      "type": "string",
-      "title": "Nome do conjunto de dados",
-      "maxlength": 60
+  properties: {
+    description: {
+      type: "string",
+      title: "Nome do conjunto de dados",
+      maxlength: 60
     },
-    "testenumero": {
-      "type": "number",
-      "title": "Teste numeros"
+    cod_table: {
+      type: "string",
+      title: "Código único",
+      pattern: ""
     },
-    "fieldA": {
-      "type": "number",
-       "default": 12,
-      //  "minimum": 0.0,
-      //  "maximum": 1.0
-  },
-    "cod_table": {
-      "type": "string",
-      "title": "Código único",
-      "pattern": ""
-    },
-    "code_group": {
-      "type": "string",
-      "title": "Grupo a que pertence",
-      "enum": [
+    code_group: {
+      type: "string",
+      title: "Grupo a que pertence",
+      enum: [
         "A preencher"
       ],
       enumNames: [
         "Label a preencher"
       ]
     },
-    "data_type": {
-      "type": "string",
-      "title": "Tipo de conjunto de dados",
-      "enum": [
+    data_type: {
+      type: "string",
+      title: "Tipo de conjunto de dados",
+      enum: [
         "alfa",
         "algageom",
         "vectorlist",
         "rasterlist"
       ],
-      "enumNames": [
+      enumNames: [
         "Dados alfanuméricos",
         "Dados alfanuméricos e geográficos",
         "Lista de temas vetoriais",
