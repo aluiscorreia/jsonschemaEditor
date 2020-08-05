@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+
 // import Form from 'react-jsonschema-form';
 // import { withTheme } from 'react-jsonschema-form';
-import Form from 'react-jsonschema-form-bs4';
+// import Form from 'react-jsonschema-form-bs4';
 // import Form from '@rjsf/core';
+
+import React, { useState } from 'react'
+// import Form from './rjsf-bs4/src/index'
+import NewThemeForm from './new-theme/newThemeForm'
 import { Accordion, Card } from 'react-bootstrap';
 import Editor, { ControlledEditor } from '@monaco-editor/react';
-import { defaultSchemaJS, formDataJS, schemaInfo } from './data'
+import { formDataTest, schemaInfo } from './data'
 import './App.css';
+// import { ArrayFieldTemplate1 } from './rjsf-templates/array-template1'
 
 const isJSON = (str) => {
   if (typeof (str) !== 'string') {
@@ -21,19 +26,20 @@ const isJSON = (str) => {
 }
 
 function App() {
-  const defaultSchema = JSON.stringify(defaultSchemaJS)
-  const defaultData = JSON.stringify(formDataJS)
-  const [schema, setSchema] = useState(defaultSchema)
-  const [UISchema, setUISchema] = useState("{}")
+  // const defaultSchema = JSON.stringify(defaultSchemaJS)
+  // const defSchemaUI = JSON.stringify(defaultSchemaUI)
+  const defaultData = JSON.stringify(formDataTest)
+  // const [schema, setSchema] = useState(defaultSchema)
+  // const [UISchema, setUISchema] = useState(defSchemaUI)
   const [formData, setFormData] = useState(defaultData) // useState("{}")
 
   const handleEdits = (value, type) => {
     switch (type) {
       case "schema":
-        isJSON(value) && setSchema(value);
+        // isJSON(value) && setSchema(value);
         break;
       case "uischema":
-        isJSON(value) && setUISchema(value);
+        // isJSON(value) && setUISchema(value);
         break;
       case "formdata":
         isJSON(value) && setFormData(value);
@@ -46,13 +52,18 @@ function App() {
   return (
     <React.Fragment>
       <main className="p-3 row">
-        <Form
+        {/* <Form
           className="col-7"
           schema={JSON.parse(schema)}
           formData={JSON.parse(formData)}
           uiSchema={JSON.parse(UISchema)}
-          onChange={(event) => setFormData(JSON.stringify(event.formData))}
+          onChange={(event) => setFormData(JSON.stringify(event.formData, null, '  '))}
           onError={console.error}
+          // ArrayFieldTemplate={ArrayFieldTemplate1}
+        /> */}
+        <NewThemeForm
+          formData={JSON.parse(formData)}
+          onChange={(event) => setFormData(JSON.stringify(event.formData, null, '  ')) }
         />
         <aside className="col-5 h-100 position-fixed" style={{ right: 0 }}>
           <Accordion defaultActiveKey="1">

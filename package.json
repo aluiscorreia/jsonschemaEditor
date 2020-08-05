@@ -4,7 +4,9 @@
   "private": true,
   "dependencies": {
     "@monaco-editor/react": "^3.3.0",
+    "@rjsf/core": "^2.2.2",
     "bootstrap": "^4.4.1",
+    "core-js": "^2.5.7",
     "react": "^16.13.1",
     "react-bootstrap": "^1.0.1",
     "react-dom": "^16.13.1",

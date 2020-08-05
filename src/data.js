@@ -1,95 +1,23 @@
-export const defaultSchemaJS = 
-{
-  references: {
-    alfaGeom: {
-
-    },
-    geoList: {
-
-    }
-  },
-  title: "Criação de conjunto de dados",
-  description: "Formulário de apoio à criação de novo conjunto de dados",
-  type: "object",
-  required: [
-    
-  ],
-  properties: {
-    description: {
-      type: "string",
-      title: "Nome do conjunto de dados",
-      maxlength: 60
-    },
-    cod_table: {
-      type: "string",
-      title: "Código único",
-      pattern: ""
-    },
-    code_group: {
-      type: "string",
-      title: "Grupo a que pertence",
-      enum: [
-        "A preencher"
-      ],
-      enumNames: [
-        "Label a preencher"
-      ]
-    },
-    data_type: {
-      type: "string",
-      title: "Tipo de conjunto de dados",
-      enum: [
-        "alfa",
-        "algageom",
-        "vectorlist",
-        "rasterlist"
-      ],
-      enumNames: [
-        "Dados alfanuméricos",
-        "Dados alfanuméricos e geográficos",
-        "Lista de temas vetoriais",
-        "Lista de temas raster"
-      ]
-    }, /*
-    create_order: {
-      type: "integer",
-      title: "Create Order? Por omissão fica o valor a seguir ao mais alto"
-    },
-    order_in_group: {
-      type: "integer",
-      title: "Order in Group? Será depois definido - Por omissão fica o último"
-    },
-    z_index: {
-      type: "integer",
-      title: "zIndex? Por omissão fica o valor a seguir ao mais alto - hipótese de reordenar?"
-    }, */
-    json_schema: {
-      title: "Campos a incluir",
-      type: "array",
-      items: {
-        title: "Nome do campo",
-        type: "object",
-        properties: {
-          campo: {
-            title: "Campo",
-            type: "string"
-          },
-          type: {
-            title: "Tipo de campo",
-            type: "string"
-          }
-        }
-      }
-    }
-
-  }
-};
-
-export const formDataJS = {
+export const formDataTest = {
   "description":"Conj. de dados",
-  "cod_table":"test1",
+  "code_table":"test1",
   "code_group":"A preencher",
-  "data_type":"algageom"
+  "data_type":"alfa",
+  "title_form": "TITULO DO FORMULARIO",
+  "table_fields": [
+    {
+      "campo": "campo1",
+      "tipo": "integer"
+    },
+    {
+      "campo": "campo2",
+      "tipo": "string"
+    },
+    {
+      "campo": "geom",
+      "tipo": "geometry"
+    }
+  ]
 }
 
 export const schemaInfo =

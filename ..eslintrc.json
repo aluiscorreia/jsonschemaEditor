@@ -1,0 +1,4 @@
+{
+  // The rest of your ESLint config...
+  "ignorePatterns": [ "./src/rjsf-bs4/**" ] 
+}
