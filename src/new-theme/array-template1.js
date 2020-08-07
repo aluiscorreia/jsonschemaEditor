@@ -1,7 +1,12 @@
-import React from "react"
+import React, { useState } from "react"
+import { FieldConfig } from './FieldConfig'
 
 export function ArrayFieldTemplate1(props) {
+  const [modalShow, setModalShow] = useState(false)
+  const [actualElement, setActualElement] = useState(null)
+
   return (
+    <>
     <div className={props.className}>
       {props.items &&
         props.items.map(element => (
@@ -28,6 +33,9 @@ export function ArrayFieldTemplate1(props) {
             <button onClick={element.onDropIndexClick(element.index)}>
               Delete
             </button>
+            <button onClick={() => { setActualElement(element); setModalShow(true) }}>
+              Configuração
+            </button>
             <hr />
           </div>
         ))}
@@ -42,6 +50,14 @@ export function ArrayFieldTemplate1(props) {
         </div>
       )}
     </div>
+    <FieldConfig
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+        backdrop="static"
+        keyboard={false}
+        element={actualElement}
+      />
+    </>
   );
 }
 

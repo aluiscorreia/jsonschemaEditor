@@ -1,11 +1,10 @@
 import React from 'react'
 import Form from './../rjsf-bs4/src/index'
 import { NT_JSSchema, NT_UISchema } from './NewThemeSchemas'
-// import { ArrayFieldTemplate1 } from './array-template1'
+import { ArrayFieldTemplate1 } from './array-template1'
 
 function NewThemeForm({ formData, onChange }) {
-
-  function createJSSchema(title_form, dataFields) {
+    function createJSSchema(title_form, dataFields) {
     const props = dataFields.reduce((obj, field) => {
       return {
         ...obj,
@@ -42,16 +41,16 @@ function NewThemeForm({ formData, onChange }) {
   }
 
   return (
-  <Form
-    className="col-7"
-    schema={NT_JSSchema}
-    formData={formData}
-    uiSchema={NT_UISchema}
-    onChange={(event) => onChange(event) }
-    onError={console.error}
-    //ArrayFieldTemplate={ArrayFieldTemplate1}
-    onSubmit={(data)=>processSubmit(data.formData)}
-  />
+      <Form
+        className="col-7"
+        schema={NT_JSSchema}
+        formData={formData}
+        uiSchema={NT_UISchema}
+        //onChange={(event) => onChange(event) }
+        onError={console.error}
+        ArrayFieldTemplate={ArrayFieldTemplate1}
+        onSubmit={(data)=>processSubmit(data.formData)}
+      />
   )
 }
 
