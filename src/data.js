@@ -1,24 +1,25 @@
-export const formDataTest = {
-  "description":"Conj. de dados",
+export const formDataTest = {}
+export const formDataTest_ = {
+  "desc_theme":"Conj. de dados de teste",
   "code_table":"test1",
-  "code_group":"A preencher",
   "data_type":"alfa",
   "title_form": "TITULO DO FORMULARIO",
-  "table_fields": [
+  "theme_fields": [
     {
+      "specific": {},
       "campo": "campo1",
-      "tipo": "integer"
+      "tipo": "texto",
+      "chave": true
     },
     {
-      "campo": "campo2",
-      "tipo": "string"
-    },
-    {
-      "campo": "geom",
-      "tipo": "geometry"
+      "specific": {},
+      "campo": null,
+      "tipo": "inteiro",
+      "chave": true
     }
   ]
 }
+
 
 export const schemaInfo =
 `// Type definitions for json-schema 4.0, 6.0 and 7.0

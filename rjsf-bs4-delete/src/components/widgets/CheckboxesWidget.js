@@ -20,13 +20,12 @@ function CheckboxesWidget(props) {
   return (
     <div className="checkboxes" id={id}>
       {enumOptions.map((option, index) => {
-        const checkboxId = `${id}_${index}`; // REVIEW
+        const checkboxId = `${id}_${index}`;
         const checked = value.indexOf(option.value) !== -1;
         const itemDisabled =
           enumDisabled && enumDisabled.indexOf(option.value) != -1;
         const disabledCls =
           disabled || itemDisabled || readonly ? "disabled" : "";
-        // REVIEW id={`${id}_${index}`} in line 34
         const checkbox = (
             <input
               className="form-check-input"
@@ -45,16 +44,6 @@ function CheckboxesWidget(props) {
               }}
             />
         );
-        /* REVIEW
-        return inline ? (
-          <label key={index} className={`checkbox-inline ${disabledCls}`}>
-            {checkbox}
-          </label>
-        ) : (
-          <div key={index} className={`checkbox ${disabledCls}`}>
-            <label>{checkbox}</label>
-          </div>
-        ); */
         return inline ? (
           <div className={`form-check-inline ${disabledCls}`} key={checkboxId}>
             {checkbox}

@@ -1,0 +1,41 @@
+/* CSS for React JSON Schema Form for new themes
+Use a class name for all called "rjsf-newTheme"
+*/
+
+.rjsf-newTheme .mb-5 {
+  margin-bottom: 1.5rem !important;
+  margin-top: -0.6rem !important;
+}
+
+.rjsf-newTheme .form-group {
+  margin-bottom: 0.1rem;
+  width: 100%;
+}
+.rjsf-newTheme .th-newTheme {
+  background-color:#f3f3f3;
+  font-weight: 600;
+}
+
+/* to hide some table fields */
+.rjsf-newTheme .specific-hidden {
+  display: none;
+}
+
+.rjsf-newTheme .txt-center {
+  text-align: center;
+}
+
+.rjsf-newTheme .td-vcenter{
+  display: flex;
+  align-items: center;
+}
+
+.rjsf-newTheme .td-hcenter{
+  display: flex;
+  justify-content: center;
+}
+
+/* Styles for Config Field Form */
+.rjsf-newTheme-FldConfig .form-group {
+  margin-bottom: 0.2rem;
+}

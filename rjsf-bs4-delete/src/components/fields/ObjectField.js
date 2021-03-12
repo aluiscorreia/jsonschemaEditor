@@ -10,7 +10,7 @@ import {
   ADDITIONAL_PROPERTY_FLAG,
 } from "../../utils";
 
-function DefaultObjectFieldTemplate(props) {
+export function DefaultObjectFieldTemplate(props) {
   const canExpand = function canExpand() {
     const { formData, schema, uiSchema } = props;
     if (!schema.additionalProperties) {

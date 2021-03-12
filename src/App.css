@@ -8,3 +8,132 @@ form, aside {
 .fixed-bottom {
   height: 400px;
 }
+
+/* --------- for ellipsis in Pivot table -------------- */
+
+/* span.pvtAttr [pvt-atr-title] {
+  width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+} */
+
+span.pvtAttr [pvt-atr-title] {
+  /* font-size: 18px; */
+  position: relative;
+  /* cursor: help; */
+  margin: 0;
+  cursor: move;
+}
+  
+span.pvtAttr [pvt-atr-title]:hover::before {
+  content: attr(pvt-atr-title);
+  position: absolute;
+  bottom: -30px;
+  padding: 5px;
+  background: #000;
+  color: #fff;
+  font-size: 10px;
+  white-space: nowrap;
+  border-radius: 4px;
+}
+span.pvtAttr [pvt-atr-title]:hover::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 8px;
+  border: 6px solid transparent;  
+  border-bottom: 6px solid #000;
+}
+
+/* --- versao 2 -----------------------------*/
+span.pvtAttr .pvt-overflow {
+  overflow: hidden;
+  -ms-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+  /* float: left; */
+}
+
+span.pvtAttr label.pvt-overflow {
+  margin: 0;
+  vertical-align: top;
+  z-index: 3;
+  position: relative;
+}
+
+span.pvtAttr .pvt-overflow-tip:hover {
+  overflow: visible;
+}
+
+span.pvtAttr .pvt-overflow-tip:hover span {
+  position: relative;
+  background-color: white;
+
+  box-shadow: 0 0 4px 0 black;
+  border-radius: 1px;
+  cursor: move;
+}
+
+span.pvtAttr i.fa-database { 
+  font-size: 0.9em;
+  color: gray;
+  z-index: 1;
+  position: relative;
+  margin-left: 5px;
+  cursor: help;
+  vertical-align: middle;
+  top: -0.1em;
+}
+
+span.pvtAttr i.fa-database:after{
+  position: absolute;
+  right: -0.5em;
+  top: -0.2em;
+  content: "i";
+  padding: 0em;
+  border-radius: 1em;
+  line-height: 2em;
+  color: white;
+  background: #495057;
+  text-align: center;
+  min-width: 1.2em;
+  font: bold .6em sans-serif;
+}
+
+span.pvtAttr i.fa-database .tooltiptext {
+  visibility: hidden;
+  /* width: 120px; */
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 10;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+span.pvtAttr i.fa-database .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+span.pvtAttr i.fa-database:hover {
+  z-index: 5;
+}
+span.pvtAttr i.fa-database:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
