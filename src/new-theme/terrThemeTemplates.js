@@ -12,9 +12,10 @@ export const NT_nomeCampo = "campo"
 export const NT_tipoCampo = "tipo"
 export const NT_FieldsTable = {
   [NT_nomeCampo]: { title: "Nome do campo*", colSize: "col-4", cssHeader: "td-vcenter", cssCell: "td-vcenter", style: "" }, 
-  [NT_tipoCampo]: { title: "Tipo de dados*", colSize: "col-4", cssHeader: "td-vcenter", cssCell: "td-vcenter", style: "" },
+  [NT_tipoCampo]: { title: "Tipo de dados*", colSize: "col-3", cssHeader: "td-vcenter", cssCell: "td-vcenter", style: "" },
   chave: { title: "Campo chave?", colSize: "col-1", cssHeader: "td-vcenter", cssCell: "td-vcenter", styles: { textAlign: "center" } },
   obrigatorio: { title: "Preench. Obrig.?", colSize: "col-1", cssHeader: "td-vcenter", cssCell: "td-vcenter", styles: { textAlign: "center"} },
+  onList: { title: "Incluir na listagem?", colSize: "col-1", cssHeader: "td-vcenter", cssCell: "td-vcenter", styles: { textAlign: "center"} },
   [NT_ButtonsColID]: { title: "", colSize: "col-2", cssHeader: "", cssCell: "", style: { marginLeft: "auto"} }
 }
 
@@ -42,7 +43,7 @@ const fieldsCols = Object.keys(NT_FieldsTable) // props.uiSchema["ui:ListFieldCo
 function _getFieldValue(element, key) {
   return element.props ? 
     element.props.formData ? 
-      element.props.formData.hasOwnProperty(key) ? key : undefined
+      element.props.formData.hasOwnProperty(key) ? element.props.formData[key] : undefined
     : undefined
   : undefined
 }
@@ -50,12 +51,20 @@ function _getFieldValue(element, key) {
 // ========================================================================
 // Template to generate each column of table (<td>...</td>)
 export function RowTableColFieldObjTemplate(props) {
-  return props.properties.map(prop => 
-    fieldsCols.includes(prop.name) && (
-      <td className={`${NT_FieldsTable[prop.name].colSize} ${NT_FieldsTable[prop.name].cssCell}`} style={NT_FieldsTable[prop.name].styles} key={prop.content.key}>
-        {prop.content}
+  const formData = props.formData
+  return props.properties.map(prop => {
+    prop.content.props.uiSchema["ui:disabled"] = (formData[prop.name + "Disabled"] === undefined ? false : formData[prop.name + "Disabled"])
+    const ret = fieldsCols.includes(prop.name) && (
+      <td 
+        className={`${NT_FieldsTable[prop.name].colSize} ${NT_FieldsTable[prop.name].cssCell}`} 
+        style={NT_FieldsTable[prop.name].styles} 
+        key={prop.content.key}
+      >
+        {(formData[prop.name + "Removed"] === undefined ? true : !formData[prop.name + "Removed"]) && prop.content}
       </td>
-  ))
+    )
+    return ret
+  })
 }
 
 // ========================================================================
@@ -142,6 +151,7 @@ function RowTableItem(rowProps, openModal) {
                 aria-label="Remove"
                 className="array-item-remove"
                 tabIndex="-1"
+                title="Remover campo"
                 style={btnStyle}
                 disabled={rowProps.disabled || rowProps.readonly || _getFieldValue(rowProps.children,"removeDisabled")}
                 onClick={rowProps.onDropIndexClick(rowProps.index)}
@@ -153,11 +163,11 @@ function RowTableItem(rowProps, openModal) {
                 aria-label="Detalhes"
                 className="array-item-settings"
                 tabIndex="-1"
+                title="Configurar propriedades"
                 style={btnStyle}
                 disabled={rowProps.disabled || rowProps.readonly}
                 onClick={(event) => { 
                   if (event) event.preventDefault()
-                  // console.log(rowProps)
                   openModal(rowProps) 
                 }}
               />
@@ -172,12 +182,7 @@ export function ListFieldAsTableTemplate(props) {
   const [modalShow, setModalShow] = useState(false)
   const [actualElement, setActualElement] = useState(null)
 
-  /* function processSubmit(index, arraydata) {
-    console.log("==> processSubmit in FieldConfig in ArrayFieldTemplate1 - Index: " + index)
-    console.log(arraydata)
-  } */
   const openModal = (element) => {
-    // console.log(props.formContext)
     setActualElement(element); 
     setModalShow(true)
   }
@@ -202,9 +207,10 @@ export function ListFieldAsTableTemplate(props) {
                     <IconButton
                       type="info"
                       icon="plus"
-                      className="btn-add col-12"
+                      className="btn-add"
                       aria-label="Add"
                       tabIndex="0"
+                      title="Adicionar campo"
                       onClick={props.onAddClick}
                       disabled={props.disabled || props.readonly}
                     />

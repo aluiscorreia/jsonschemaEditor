@@ -1,21 +1,22 @@
-export const formDataTest = {}
-export const formDataTest_ = {
+export const formDataTest_ = {}
+export const formDataTest = {
   "desc_theme":"Conj. de dados de teste",
   "code_table":"test1",
-  "data_type":"alfa",
+  "theme_type":"alfa",
   "title_form": "TITULO DO FORMULARIO",
   "theme_fields": [
     {
-      "specific": {},
+      "specific": { "title": "campo chave"},
       "campo": "campo1",
       "tipo": "texto",
       "chave": true
     },
     {
-      "specific": {},
-      "campo": null,
+      "specific": { "title": "campo inteiro"},
+      "campo": "valorinteiro",
       "tipo": "inteiro",
-      "chave": true
+      "obrigatorio": true,
+      "onList": true
     }
   ]
 }

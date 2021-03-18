@@ -35,6 +35,24 @@ Use a class name for all called "rjsf-newTheme"
   justify-content: center;
 }
 
+/* To disable some fields of specific rows */
+.rjsf-newTheme table td[disabled]::after {
+  position: absolute;
+  content: '';
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.rjsf-newTheme table td[disabled] {
+  filter: blur(0px);
+  pointer-events: none;
+}
+
+
+
 /* Styles for Config Field Form */
 .rjsf-newTheme-FldConfig .form-group {
   margin-bottom: 0.2rem;

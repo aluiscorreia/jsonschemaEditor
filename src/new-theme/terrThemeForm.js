@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
-// DELETE ?? import { Modal, Alert } from 'react-bootstrap'
 import Form from '@rjsf/bootstrap-4'
-import { NT_ThemeTypes, NT_JSSchema, NT_UISchema } from './terrSchemasDefs'
+import { NT_ThemeTypes, NT_JSSchema, NT_UISchema, NT_ThemesFldDatatypesLabels } from './terrSchemasDefs'
 import { NTwidgets } from './terrThemeWidgets'
 import { ListFieldAsTableTemplate } from './terrThemeTemplates'
 import './terrThemeForm.css'
@@ -18,8 +17,8 @@ function TerrThemeForm({formData: formDataIn, groupName, onChange, onSubmit, ...
       uischema: NT_UISchema
     }
   })
-  const [actualThemeType, setActualThemeType] = useState(formDataIn ? formDataIn.data_type : undefined)
-  // const previousValues = useRef({data_type: formData ? formData.data_type : undefined}).current
+  const [actualThemeType, setActualThemeType] = useState(formDataIn ? formDataIn.theme_type : undefined)
+  // const previousValues = useRef({theme_type: formData ? formData.theme_type : undefined}).current
   // const [_jsschema, ] = useState(() => { 
   //   const tmp_JSSchema = Object.assign({}, NT_JSSchema)
   //   tmp_JSSchema.description = "Formulário de apoio à criação de novo conjunto de dados" + (groupName ? " no grupo '" + groupName + "'" : "")
@@ -27,56 +26,52 @@ function TerrThemeForm({formData: formDataIn, groupName, onChange, onSubmit, ...
   // })
   // DELETE ?? const [errorModalShow, setErrorModalShow] = useState(false)
 
-  /**
-   * Create the final JSON Schema for the new theme (in final format to be inserted in database)
-   * @param {*} title_form 
-   * @param {*} dataFields 
-   */
-  function createJSSchemaForNewTheme(title_form, dataFields) {
-    // TODO
-    const templixo = { texto: "string", inteiro: "integer"}
-    const fldprops = dataFields.reduce((obj, field) => {
-      const fieldDef = {
-        type: templixo[field.tipo]
-      }
-      if (field.chave) fieldDef.database = { "primaryKey": true }
-      return {
-        ...obj,
-        [field.campo]: Object.assign(fieldDef, field.specific || {})
-      };
-    }, {})
-    return {
-      type: "object",
-      title: title_form,
-      properties: fldprops
-    }
-  }
+  // /**
+  //  * Create the final JSON Schema for the new theme (in final format to be inserted in database)
+  //  * @param {*} title_form 
+  //  * @param {*} dataFields 
+  //  */
+  // function createJSSchemaForNewTheme(title_form, dataFields) {
+  //   const templixo = { texto: "string", inteiro: "integer"}
+  //   const fldprops = dataFields.reduce((obj, field) => {
+  //     const fieldDef = {
+  //       type: templixo[field.tipo]
+  //     }
+  //     if (field.chave) fieldDef.database = { "primaryKey": true }
+  //     return {
+  //       ...obj,
+  //       [field.campo]: Object.assign(fieldDef, field.specific || {})
+  //     };
+  //   }, {})
+  //   return {
+  //     type: "object",
+  //     title: title_form,
+  //     properties: fldprops
+  //   }
+  // }
 
-  /**
-   * Create the final UI Schema for the new theme (in final format to be inserted in database)
-   * @param {*} dataFields 
-   */
-  function createUISchemaForNewTheme(dataFields) {
-    // TODO
-    return { }
-  }
+  // /**
+  //  * Create the final UI Schema for the new theme (in final format to be inserted in database)
+  //  * @param {*} dataFields 
+  //  */
+  // function createUISchemaForNewTheme(dataFields) {
+  //   return { }
+  // }
 
   /**
    * Executed on Click on Submit butto
    * @param {*} dataForm 
    */
   function _processSubmit(dataForm) {
-    // TODO
-    console.log("==> processSubmit in Form os TerrThemeForm")
-    console.log(dataForm)
     const ret = {}
     ret.code_table = dataForm.code_table
     ret.code_group = dataForm.code_group
-    ret.data_type = dataForm.data_type
+    ret.data_type = dataForm.theme_type
     ret.description = dataForm.desc_theme
     ret.name_table = dataForm.code_table.toLowerCase()
-    ret.json_schema = createJSSchemaForNewTheme(dataForm.title_form, dataForm.theme_fields)
-    ret.ui_schema = createUISchemaForNewTheme(dataForm.theme_fields)
+    const aux = NT_ThemeTypes[dataForm.theme_type].getFinalSchema(dataForm.title_form, dataForm.description_form, dataForm.theme_fields)
+    Object.assign(ret, aux)
+
     onSubmit(ret)
   }
 
@@ -85,15 +80,17 @@ function TerrThemeForm({formData: formDataIn, groupName, onChange, onSubmit, ...
    * @param {*} event 
    */
   function _onChange(event) {
-    if (actualThemeType !== event.formData.data_type) {
-      const NT_ThemeType = NT_ThemeTypes[event.formData.data_type]
+    if (actualThemeType !== event.formData.theme_type) {
+      const NT_ThemeType = NT_ThemeTypes[event.formData.theme_type]
       event.formData.theme_fields = NT_ThemeType.defaultFields
       event.schema.properties.theme_fields = NT_ThemeType.jsSchema
-      if (event.formData.data_type !== 'fromwms')
-        event.schema.properties.theme_fields.items.properties.tipo.enum = NT_ThemeType.fieldTypes
+      if (event.formData.theme_type !== 'fromwms') {
+        event.schema.properties.theme_fields.items.properties.tipo.enum = NT_ThemeType.allowedFldDatatypes
+        event.schema.properties.theme_fields.items.properties.tipo.enumNames = NT_ThemesFldDatatypesLabels(NT_ThemeType.allowedFldDatatypes)
+      }
     }
     
-    setActualThemeType(event.formData.data_type)
+    setActualThemeType(event.formData.theme_type)
     set_rjsfData({ formData: event.formData, schema: event.schema, uischema: event.uiSchema })
     if (onChange) return onChange(event.formData)
   }
@@ -105,17 +102,39 @@ function TerrThemeForm({formData: formDataIn, groupName, onChange, onSubmit, ...
    * @param {*} errors 
    */
   function validateForm(formData, errors) {
-    console.log("-- INVOCOU validateForm - ")
+    const validateProps = (formData_level, props_level, errors_level) => {
+      Object.entries(props_level).forEach(([field, props]) => {
+        let error = null
+        if (props.validateField) {
+          error = props.validateField(formData_level[field], formData_level)
+          if (error) errors_level[field].addError(error)
+        }
+      })
+    }
     // DELETE ?? setErrorModalShow(true)
-    Object.entries(NT_JSSchema.properties).forEach(([field, props]) => {
-      let error = null
-      if (props.validateField) {
-        error = props.validateField(formData[field])
-        if (error) errors[field].addError(error)
-      }
-    })
-    // ?? errors.addError("LIXO")
-    // ?? errors.addError("LIXO 2 2 2 2 2")
+    // Validate individually each properties of theme (first level - not theme_fields)
+    validateProps(formData, NT_JSSchema.properties, errors)
+    // Theme type
+    const isThemeTableType = rjsfData.schema.properties.theme_fields.items !== undefined
+    // Validate each field at theme field level
+    const theme_fields_props = 
+      isThemeTableType ? rjsfData.schema.properties.theme_fields.items.properties
+      : rjsfData.schema.properties.theme_fields.properties || {}
+    if (Array.isArray(formData.theme_fields))
+      formData.theme_fields.forEach((row, index) => validateProps(row, theme_fields_props, errors.theme_fields[index]))
+    else validateProps(formData.theme_fields, theme_fields_props, errors.theme_fields)
+    // Validate globally fields at theme level
+    /* if (isThemeTableType)
+    formData.theme_fields.forEach(row => {
+      if (NT_FldDatatypesConfig[row.tipo].requiredProps)
+
+    }) */
+    // Validate at theme level
+    if (NT_ThemeTypes[formData.theme_type].validateThemeFields) {
+      const aux = NT_ThemeTypes[formData.theme_type].validateThemeFields(formData.theme_fields)
+      if (aux) aux.forEach(errorMsg => errors.addError(errorMsg))
+    }
+
     return errors;
   }
 

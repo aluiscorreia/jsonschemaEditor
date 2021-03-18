@@ -58,8 +58,8 @@ function App() {
 
   const processSubmit = (data) => {
     setRecTheme(JSON.stringify(data, null, '  '))
-    setSchema(JSON.stringify(data.json_schema, null, '  '))
-    setUISchema(JSON.stringify(data.ui_schema, null, '  '))
+    setSchema(JSON.stringify(data.json_schema || {}, null, '  '))
+    setUISchema(JSON.stringify(data.ui_schema || {}, null, '  '))
   }
 
   return (
