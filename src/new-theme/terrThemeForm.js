@@ -7,12 +7,12 @@ import './terrThemeForm.css'
 
 // ========================================================================
 // Form to create a new theme/layer
-function TerrThemeForm({formData: formDataIn, groupName, themesFK, onChange, onSubmit, ...props }) {
-  const [rjsfData, set_rjsfData] = useState(() => { 
+function TerrThemeForm({ formData: formDataIn, groupName, themesFK, onChange, onSubmit, isLoading, ...props }) {
+  const [rjsfData, set_rjsfData] = useState(() => {
     const tmp_JSSchema = Object.assign({}, NT_JSSchema)
     tmp_JSSchema.description = "Formulário de apoio à criação de novo conjunto de dados" + (groupName ? " no grupo '" + groupName + "'" : "")
     return {
-      formData: formDataIn, 
+      formData: formDataIn,
       schema: tmp_JSSchema,
       uischema: NT_UISchema
     }
@@ -62,7 +62,7 @@ function TerrThemeForm({formData: formDataIn, groupName, themesFK, onChange, onS
         event.schema.properties.theme_fields.items.properties.tipo.enumNames = NT_ThemesFldDatatypesLabels(NT_ThemeType.allowedFldDatatypes)
       }
     }
-    
+
     setActualThemeType(event.formData.theme_type)
     set_rjsfData({ formData: event.formData, schema: event.schema, uischema: event.uiSchema })
     if (onChange) return onChange(event.formData)
@@ -90,9 +90,9 @@ function TerrThemeForm({formData: formDataIn, groupName, themesFK, onChange, onS
     // Theme type
     const isThemeTableType = rjsfData.schema.properties.theme_fields.items !== undefined
     // Validate each field at theme field level
-    const theme_fields_props = 
+    const theme_fields_props =
       isThemeTableType ? rjsfData.schema.properties.theme_fields.items.properties
-      : rjsfData.schema.properties.theme_fields.properties || {}
+        : rjsfData.schema.properties.theme_fields.properties || {}
     if (Array.isArray(formData.theme_fields))
       formData.theme_fields.forEach((row, index) => validateProps(row, theme_fields_props, errors.theme_fields[index]))
     else validateProps(formData.theme_fields, theme_fields_props, errors.theme_fields)
@@ -128,7 +128,7 @@ function TerrThemeForm({formData: formDataIn, groupName, themesFK, onChange, onS
   /**
    * React Json Schema Form
    */
-  return ( 
+  return (
     <>
       <Form
         className={props.className + " rjsf-newTheme"}
@@ -139,15 +139,16 @@ function TerrThemeForm({formData: formDataIn, groupName, themesFK, onChange, onS
         formData={rjsfData.formData}
         uiSchema={rjsfData.uischema}
         showErrorList={false}
-        onChange={(event) => _onChange(event) }
+        onChange={(event) => _onChange(event)}
         formContext={{ actualThemeType: actualThemeType }}
         onError={(errors) => false} //{console.error}
         ArrayFieldTemplate={ListFieldAsTableTemplate}
-        onSubmit={(data)=>_processSubmit(data.formData)}
+        onSubmit={(data) => !isLoading && _processSubmit(data.formData)}
         validate={validateForm}
         transformErrors={transformFormErrors}
         widgets={NTwidgets}
-        // {...props}
+        disabled={isLoading}
+      // {...props}
       />
       {/* DELETE ??  <Modal // Modal form to show global erros on submit
         show={errorModalShow}
