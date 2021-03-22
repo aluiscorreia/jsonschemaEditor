@@ -11,9 +11,9 @@ function validateVarnameForDB(varname) {
   return varname ? (reservedWordsSQL.has(varname.toUpperCase()) ? 'Valor inválido (Palavra reservada)' : null) : null
 }
 
-function transformErrorPattern(error) {
+function transformErrorPatternBD(error) {
   if (error.name === "pattern") {
-    error.message = "Identificador inválido (ver regras para identificadores de tabelas e campos em bases de dados)"
+    error.message = "Identificador inválido (começar com letra a-z ou _ seguindo de dígitos, letras a-z ou _)"
   }
   return error
 }
@@ -161,7 +161,7 @@ export const NT_FldDatatypesProps = {
   },
   [NT_FldDatatypesPropsFK]: {
     themesFK: {}, // Specific key to store all tables and respective keys that can be selected for a specific sub-region
-    initField: (fldDatatype) => {
+    initField: (fldDatatype, formData) => {
       const themesFK = NT_FldDatatypesProps.foreignKey.themesFK
       const tabFld = NT_FldDatatypesProps.foreignKey.jsSchema.properties.fkTable
       tabFld.enum = []
@@ -170,6 +170,8 @@ export const NT_FldDatatypesProps = {
         tabFld.enum.push(tab)
         tabFld.enumNames.push(prop.desc_table)
       })
+      if (formData[NT_FldDatatypesPropsFK] && formData[NT_FldDatatypesPropsFK].fkTable)
+        NT_FldDatatypesProps[NT_FldDatatypesPropsFK].initFieldDspFld(formData[NT_FldDatatypesPropsFK].fkTable, NT_FldDatatypesProps.foreignKey.jsSchema)
     },
     initFieldDspFld: (fkTable, fkSchema) => {
       const themesFKDspFlds = NT_FldDatatypesProps.foreignKey.themesFK[fkTable].displayfields
@@ -222,7 +224,7 @@ export const NT_FldDatatypesProps = {
     toRsjfSchemaProps: (obj) => ({ database: { type: `geometry(${obj.geomType}, ${obj.geomSrs})`,
                                                allowOverlaps: obj.geomAllowOverlaps === true ? false : undefined } }),
     toRsjfSchemaUi: (obj) => ({ "ui:widget": "customGeoInput", 
-                                "ui:options": { type: obj.geomType.includes('Point') ? 'point' : obj.geomType.includes('Line') ? 'line' : 'polygon', 
+                                "ui:options": { type: obj.geomType.includes('Point') ? 'marker' : obj.geomType.includes('Line') ? 'line' : 'polygon', 
                                                 placeholder: `Digitalizar ${obj.geomType.includes('Point') ? 
                                                   'ponto(s)' : obj.geomType.includes('Line') ? 'linha(s)' : 'polígono(s)'}`} })
   }
@@ -286,7 +288,7 @@ export const NT_FldDatatypesConfig = {
     inAllThemeType: false,
     jsSchemaType: "string",
     properties: ["title", "description", "geometryType", "readOnly"],
-    requiredProps: ["geometryType"]
+    requiredProps: ["title", "geometryType"]
   },
   listaValores: {
     label: "Lista de valores",
@@ -325,13 +327,13 @@ _NT_ThemeTypeTable.jsSchema = {
     required: ["campo", "tipo"],
     properties: {
       campo: {
-        title: "Código do campo",
+        title: "Identificador do campo",
         type: "string",
-        minLength: 4,
+        minLength: 2,
         maxLength: 12,
         pattern: "^[a-z_][a-z0-9_]*$",
-        validateField: validateVarnameForDB,
-        transformError: transformErrorPattern
+        //validateField: validateVarnameForDB,
+        transformError: transformErrorPatternBD
       },
       tipo: {
         title: "Tipo de Campo",
@@ -396,14 +398,18 @@ _NT_ThemeTypeTable.uiSchema = {
  * @param {*} description_form 
  * @param {*} theme_fields 
  */
-function getFinalSchema_fromwms(title_form, description_form, theme_fields) {
+function getFinalSchema_fromwms(theme_type, title_form, description_form, theme_fields) {
   return { // to garantee that just correct fields are returned
+    // To force some values
+    name_table: null,
+    json_schema: null,
+    ui_schema: null,
     ms_url: theme_fields.ms_url,
     ms_layer: theme_fields.ms_layer
   }
 }
 
-function getFinalSchema_ThemeTypeTable(title_form, description_form, theme_fields) {
+function getFinalSchema_ThemeTypeTable(theme_type, title_form, description_form, theme_fields) {
   const addToObject = (object, value) => value ? Object.assign(object || {}, value) : object
   // TODO Create final Schema
   const requiredFlds = []
@@ -437,6 +443,8 @@ function getFinalSchema_ThemeTypeTable(title_form, description_form, theme_field
     if (uiProps)
       Object.assign(fldsUI, { [field.campo]: uiProps })
   })
+  if (NT_ThemeTypes[theme_type].toRsjfSchemaProps) objDeepMerge(fldsProps, NT_ThemeTypes[theme_type].toRsjfSchemaProps(theme_fields))
+  if (NT_ThemeTypes[theme_type].toRsjfSchemaUi) objDeepMerge(fldsUI, NT_ThemeTypes[theme_type].toRsjfSchemaUi(theme_fields))
   return {
     json_schema: {
       type: "object",
@@ -490,6 +498,68 @@ function validateThemeFields_GeomList(theme_fields) {
   return errors
 }
 
+const defaultFields_GeomList = (isRaster) => {
+  const base = [
+    { campo: "id", tipo: "autoIncremento", chave: true, obrigatorio: true, 
+      campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, 
+      removeDisabled: true, configDisabled: true,
+      specific: { title: "Identificador interno" } },
+    { campo: "descricao", tipo: "texto", chave: false, obrigatorio: true, onList: true,
+      campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, 
+      removeDisabled: true,
+      specific: { title: "Descricao do tema" } },
+    { campo: "srs", tipo: "inteiro", chave: false, obrigatorio: true, 
+      campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, 
+      removeDisabled: true, configDisabled: true,
+      specific: { title: "Formato da imagem" } },
+    { campo: "ficheiro", tipo: "texto", chave: false, obrigatorio: true, 
+      campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, 
+      removeDisabled: true, configDisabled: true,
+      specific: { title: "Ficheiro com dados geográficos" } },
+    { campo: "ficheiropath", tipo: "texto", chave: false, obrigatorio: false, onList: false, 
+      campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, onListDisabled: true, 
+      removeDisabled: true, configDisabled: true,
+      specific: { title: "Path do ficheiro no servidor" } }
+  ]
+  if (isRaster) 
+    base.splice(3,0,{ 
+      campo: "imagetype", tipo: "texto", chave: false, obrigatorio: true, 
+      campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, 
+      removeDisabled: true, configDisabled: true,
+      specific: { title: "Sistema de coordenadas" } 
+    })
+  return base
+}
+
+const toRsjfSchemaProps_GeomList = (isRaster) => { 
+  return {
+    srs: {
+      database: {
+          foreignKey: {
+            field: "code",
+            table: "global.srs_names",
+            displayField: "designation"
+          }
+      }
+    },
+    imagetype: !isRaster ? undefined : {
+      database: {
+          foreignKey: {
+            field: "image_type",
+            table: "global.image_types",
+            displayField: "designation"
+          }
+      },
+      maxLength: 20
+    },
+    ficheiropath: {
+      title: undefined, // To clear value 
+      database: {
+          serverOnly: true
+      }
+    }
+  }
+}
 // ========================================================================
 // Theme type configuration that can be useed in theme definition (different for fromwms)
 export const NT_ThemeTypes = {
@@ -503,7 +573,9 @@ export const NT_ThemeTypes = {
       { campo: undefined, tipo: "texto", chave: true, obrigatorio: true, chaveDisabled: true, removeDisabled: true }
     ],
     getFinalSchema: getFinalSchema_ThemeTypeTable,
-    validateThemeFields: validateThemeFields_alfa
+    validateThemeFields: validateThemeFields_alfa,
+    toRsjfSchemaProps: undefined,
+    toRsjfSchemaUi: undefined
   },
   // == ALFAGEOM ============================= 
   alfageom: {
@@ -524,15 +596,16 @@ export const NT_ThemeTypes = {
     allowedFldDatatypes: defaultThemesFldDatatypes,
     jsSchema: _NT_ThemeTypeTable.jsSchema,
     uiSchema: _NT_ThemeTypeTable.uiSchema,
-    defaultFields: [
-      { campo: "id", tipo: "autoIncremento", chave: true, obrigatorio: true, campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, removeDisabled: true, configDisabled: true },
-      { campo: "descricao", tipo: "texto", chave: false, obrigatorio: true, campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, removeDisabled: true },
-      { campo: "srs", tipo: "integer", chave: false, obrigatorio: true, campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, removeDisabled: true, configDisabled: true },
-      { campo: "ficheiro", tipo: "texto", chave: false, obrigatorio: true, campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, removeDisabled: true, configDisabled: true },
-      { campo: "ficheiropath", tipo: "texto", chave: false, obrigatorio: false, onList: false, campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, onListDisabled: true, removeDisabled: true, configDisabled: true }
-    ],
+    defaultFields: defaultFields_GeomList(false),
     getFinalSchema: getFinalSchema_ThemeTypeTable,
-    validateThemeFields: validateThemeFields_GeomList
+    validateThemeFields: validateThemeFields_GeomList,
+    toRsjfSchemaProps: (_) => toRsjfSchemaProps_GeomList(false),
+    toRsjfSchemaUi: (_) => ({ 
+      ficheiro: {
+        "ui:widget": "customInputFile", 
+        "ui:options": { accept: ".zip"}
+      }
+    })
   },
   // == RASTERLIST ============================= 
   rasterlist: { 
@@ -540,9 +613,16 @@ export const NT_ThemeTypes = {
     allowedFldDatatypes: defaultThemesFldDatatypes ,
     jsSchema: _NT_ThemeTypeTable.jsSchema,
     uiSchema: _NT_ThemeTypeTable.uiSchema,
-    defaultFields: [],
+    defaultFields: defaultFields_GeomList(true),
     getFinalSchema: getFinalSchema_ThemeTypeTable,
-    validateThemeFields: validateThemeFields_GeomList
+    validateThemeFields: validateThemeFields_GeomList,
+    toRsjfSchemaProps: (_) => toRsjfSchemaProps_GeomList(true),
+    toRsjfSchemaUi: (_) => ({ 
+      ficheiro: {
+        "ui:widget": "customInputFile", 
+        "ui:options": { accept: "image/tiff,.zip"}
+      }
+    })
   },
   // == FROMWMS ============================= 
   fromwms: {
@@ -602,11 +682,11 @@ export const NT_JSSchema = {
       type: "string",
       title: "Código único",
       description: "Código para criar tabela na base de dados (4 a 10 carateres)",
-      pattern: "^[a-zA-Z_][a-zA-Z0-9_]*$",
+      pattern: "^[a-z_][a-z0-9_]*$",
       minLength: 4,
       maxLength: 10,
       validateField: validateVarnameForDB,
-      transformError: transformErrorPattern 
+      transformError: transformErrorPatternBD 
     },
     title_form: {
       type: "string",
