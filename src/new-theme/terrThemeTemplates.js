@@ -2,7 +2,7 @@
  * Data structures and functions for table template for definition of fields of a theme
  */
 import React, { useState } from "react"
-import { FieldConfig } from './terrModalFieldConfig'
+import { FieldConfigForm } from './terrModalFieldConfig'
 
 // ========================================================================
 // Gobal Variables
@@ -165,7 +165,7 @@ function RowTableItem(rowProps, openModal) {
                 tabIndex="-1"
                 title="Configurar propriedades"
                 style={btnStyle}
-                disabled={rowProps.disabled || rowProps.readonly}
+                disabled={rowProps.disabled || rowProps.readonly || _getFieldValue(rowProps.children,"configDisabled")}
                 onClick={(event) => { 
                   if (event) event.preventDefault()
                   openModal(rowProps) 
@@ -227,7 +227,7 @@ export function ListFieldAsTableTemplate(props) {
         </tbody> 
       </table>
     </div>
-    <FieldConfig
+    <FieldConfigForm
         show={modalShow}
         onHide={() => setModalShow(false)}
         backdrop="static"

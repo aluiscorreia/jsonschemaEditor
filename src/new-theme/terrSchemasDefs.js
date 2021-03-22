@@ -50,7 +50,9 @@ function getDefaultType(datatype) {
     toRsjfSchemaProps: (value) => ({ default: value })
   }
 }
+
 // GLOBAL VARIABLE WITH DEFINITIONS
+export const NT_FldDatatypesPropsFK = "foreignKey"
 export const NT_FldDatatypesProps = {
   title: {
     jsSchema: { title: "Descrição 'curta' do campo para o formulário",
@@ -123,10 +125,82 @@ export const NT_FldDatatypesProps = {
     toRsjfSchemaProps: (value) => ({ format: value })
   },
   enumList: {
-    // TODO enum List
+    jsSchema: { title: "",
+                type: "object",
+                required: ["enumType", "enumLst"],
+                properties: {
+                  enumType: { type: "string",
+                              title: "Tipo de dados da lista de valores",
+                              default: "string",
+                              enum: ["string", "integer", "number"],
+                              enumNames: ["Texto", "Valores inteiros", "Valores numéricos", "Valores lógicos"] },
+                  enumLst: { type: "string",
+                             title: "Lista de valores prédefinidos (introduzir um valor por linha)" },
+                  enumNamesLst: { type: "string",
+                             title: "Lista de etiquetas para os valores prédefinidos - opcional (uma etiqueta por linha)" }       
+                }
+    },
+    uiSchema: { enumLst: { "ui:widget": "textarea", "ui:options": { rows: 4 }},
+                enumNamesLst: { "ui:widget": "textarea", "ui:options": { rows: 4 }} },
+    toRsjfSchemaProps: ({enumType, enumLst, enumNamesLst}) => ({ 
+      type: enumType, // Repalce upper lever of type 
+      enum: enumLst.trim().split('\n').map(value => enumType === "number" ? parseFloat(value) : enumType === "integer" ? parseInt(value) : value),
+      enumNames: enumNamesLst && enumNamesLst.trim().length > 0 ? enumNamesLst.trim().split('\n') : undefined 
+    }),
+    validateField: ({enumType, enumLst, enumNamesLst}, errors) => {
+      if (enumLst.trim().split('\n').length < 2) errors.enumLst.addError("A lista de valores deve ter no mínimo 2 valores (2 linhas)")
+      else {
+        let allValid = true
+        if (enumType === "number") allValid = enumLst.trim().split('\n').every(value => !isNaN(parseFloat(value)) && isFinite(value))
+        else if (enumType === "integer") allValid = enumLst.trim().split('\n').every(value => !isNaN(parseFloat(value)) && isFinite(value) && Number.isInteger(parseFloat(value)))
+        if (!allValid) errors.enumLst.addError("Os valores da lista não são todos do tipo de dados definido")
+      }
+      if (enumNamesLst && (enumLst.trim().split('\n').length !== enumNamesLst.trim().split('\n').length))
+        errors.enumNamesLst.addError("A lista de etiquetas não tem o mesmo número de valores (mesmo número de linhas introduzidas)")
+    } 
   },
-  foreignKey: {
-    // TODO Froreign Key
+  [NT_FldDatatypesPropsFK]: {
+    themesFK: {}, // Specific key to store all tables and respective keys that can be selected for a specific sub-region
+    initField: (fldDatatype) => {
+      const themesFK = NT_FldDatatypesProps.foreignKey.themesFK
+      const tabFld = NT_FldDatatypesProps.foreignKey.jsSchema.properties.fkTable
+      tabFld.enum = []
+      tabFld.enumNames = []
+      Object.entries(themesFK).forEach(([tab, prop]) => {
+        tabFld.enum.push(tab)
+        tabFld.enumNames.push(prop.desc_table)
+      })
+    },
+    initFieldDspFld: (fkTable, fkSchema) => {
+      const themesFKDspFlds = NT_FldDatatypesProps.foreignKey.themesFK[fkTable].displayfields
+      const dspFld = fkSchema.properties.fkDspFld
+      dspFld.enum = themesFKDspFlds.enum
+      dspFld.enumNames = themesFKDspFlds.enumNames
+    },
+    jsSchema: { title: "",
+                type: "object",
+                required: ["fkTable", "fkDspFld"],
+                properties: {
+                  fkTable: { type: "string",
+                              title: "Tabela a referenciar",
+                              enum: [], enumNames: [] },
+                  fkDspFld: { type: "string",
+                              title: "Campo a referenciar",
+                              enum: [], enumNames: [] } }
+    },
+    toRsjfSchemaProps: ({fkTable, fkDspFld}) => {
+      const themeFK = NT_FldDatatypesProps.foreignKey.themesFK[fkTable]
+      return { 
+        type: themeFK.pk_type, // Replace upper lever of type
+        database: {
+          foreignKey: {
+            field: themeFK.pk_field,
+            table: fkTable,
+            displayField: fkDspFld
+          }
+        }
+      }
+    }
   },
   geometryType: {
     jsSchema: { title: "",
@@ -154,6 +228,7 @@ export const NT_FldDatatypesProps = {
   }
 }
 
+export const NT_FldDatatypeCfgForeignKey = "chaveEstrangeira"
 export const NT_FldDatatypesConfig = {
   texto: {
     label: "Texto",
@@ -212,11 +287,21 @@ export const NT_FldDatatypesConfig = {
     jsSchemaType: "string",
     properties: ["title", "description", "geometryType", "readOnly"],
     requiredProps: ["geometryType"]
+  },
+  listaValores: {
+    label: "Lista de valores",
+    inAllThemeType: true,
+    jsSchemaType: "string",
+    properties: ["title", "description", "enumList", "readOnly"],
+    requiredProps: ["title", "enumList"]
+  },
+  [NT_FldDatatypeCfgForeignKey]: {
+    label: "Referência a outro tema",
+    inAllThemeType: true,
+    jsSchemaType: "string",
+    properties: ["title", "description", "foreignKey", "readOnly"],
+    requiredProps: ["title", "foreignKey"]
   }
-   /*,
-  geometria: {},
-  listaValores: {},
-  chaveEstrangeira: {} */
 }
 
 const defaultThemesFldDatatypes = Object.keys(NT_FldDatatypesConfig).reduce(
@@ -244,7 +329,7 @@ _NT_ThemeTypeTable.jsSchema = {
         type: "string",
         minLength: 4,
         maxLength: 12,
-        pattern: "^[a-zA-Z_][a-zA-Z0-9_]*$",
+        pattern: "^[a-z_][a-z0-9_]*$",
         validateField: validateVarnameForDB,
         transformError: transformErrorPattern
       },
@@ -278,7 +363,7 @@ _NT_ThemeTypeTable.uiSchema = {
     "ui:FieldTemplate": ListFieldRowTableTemplate,
     campo: {
       "ui:options": { "label": false },
-      "ui:placeholder": "Indique o campo"
+      "ui:placeholder": "Introduza o nome do campo"
     },
     tipo: {
       "ui:label": false 
@@ -366,19 +451,41 @@ function getFinalSchema_ThemeTypeTable(title_form, description_form, theme_field
 
 // ========================================================================
 // Functions to validate fields of a theme
-function validateThemeFields_alfa(theme_fields) {
-  const countValidation = (fldId, min, max, txtFld) => {
+const validateTFaux = {
+  // Validar contagem de campos
+  countValidation: (theme_fields, errors, fldId, min, max, txtFld) => {
     const countChaves = Object.values(theme_fields).reduce((accu, fldProps) => (fldProps[fldId] ? accu + 1 : accu), 0)
     if (min && countChaves < min) errors.push(`Pelo menos ${min} dos campos tem de ser '${txtFld}'`)
     if (max && countChaves > max) errors.push(`Só pode ser definido até ${max} campo como '${txtFld}'`)
+  },
+  // Find duplicate field name (campo)
+  findDuplicates: (theme_fields, errors) => {
+    const campos = Object.values(theme_fields).map(p => p.campo)
+    const dups = campos.filter((e, i, a) => a.indexOf(e) !== i)
+    if (dups.length > 0) errors.push(`Existem campos com identificadores (nome do campo) iguais: ${dups.join('; ')}`)
+  },
+  validateThemeFields_global(theme_fields) {
+    const errors = []
+    validateTFaux.countValidation(theme_fields, errors, 'chave',1,1,"Campo chave")
+    validateTFaux.countValidation(theme_fields, errors, 'onList',1,undefined,"Campo a incluir na listagem")
+    validateTFaux.findDuplicates(theme_fields, errors)
+    return errors
   }
-  const errors = []
-  // Validar contagem de campos
-  countValidation('chave',1,1,"Campo chave")
-  countValidation('onList',1,undefined,"Campo a incluir na listagem")
-  /* const countChaves = Object.values(theme_fields).reduce((accu, fldProps) => (fldProps.chave ? accu + 1 : accu), 0)
-  if (countChaves === 0) errors.push("Pelo menos um dos campos tem de ser 'Campo chave'")
-  if (countChaves > 1) errors.push("Só pode ser definido um campo como 'Campo chave'") */
+}
+
+function validateThemeFields_alfa(theme_fields) {
+  return validateTFaux.validateThemeFields_global(theme_fields)
+}
+
+function validateThemeFields_alfaGeom(theme_fields) {
+  const errors = validateTFaux.validateThemeFields_global(theme_fields)
+  const countGeom = Object.values(theme_fields).reduce((accu, fldProps) => (fldProps.tipo === "geometry" ? accu + 1 : accu), 0)
+  if (countGeom !== 1) errors.push("Um tema com dados geográficos só pode ter um único campo com tipo de dados 'Dados geográficos'")
+  return errors
+}
+
+function validateThemeFields_GeomList(theme_fields) {
+  const errors = validateTFaux.validateThemeFields_global(theme_fields)
 
   return errors
 }
@@ -405,10 +512,11 @@ export const NT_ThemeTypes = {
     jsSchema: _NT_ThemeTypeTable.jsSchema,
     uiSchema: _NT_ThemeTypeTable.uiSchema,
     defaultFields: [
-      { campo: undefined, tipo: "texto", chave: true, obrigatorio: true, chaveDisabled: true, removeDisabled: true },
-      { campo: "geom", tipo: "geometry", chave: false, obrigatorio: true, tipoDisabled: true, onListDisabled: true, removeDisabled: true }
+      { campo: undefined, tipo: "texto", chave: true, obrigatorio: true, removeDisabled: true },
+      { campo: "geom", tipo: "geometry", chave: false, obrigatorio: true, chaveDisabled: true, tipoDisabled: true, onListDisabled: true, removeDisabled: true }
     ],
-    getFinalSchema: getFinalSchema_ThemeTypeTable
+    getFinalSchema: getFinalSchema_ThemeTypeTable,
+    validateThemeFields: validateThemeFields_alfaGeom
   },
   // == VECTORLIST ============================= 
   vectorlist: { 
@@ -416,8 +524,15 @@ export const NT_ThemeTypes = {
     allowedFldDatatypes: defaultThemesFldDatatypes,
     jsSchema: _NT_ThemeTypeTable.jsSchema,
     uiSchema: _NT_ThemeTypeTable.uiSchema,
-    defaultFields: [],
-    getFinalSchema: getFinalSchema_ThemeTypeTable
+    defaultFields: [
+      { campo: "id", tipo: "autoIncremento", chave: true, obrigatorio: true, campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, removeDisabled: true, configDisabled: true },
+      { campo: "descricao", tipo: "texto", chave: false, obrigatorio: true, campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, removeDisabled: true },
+      { campo: "srs", tipo: "integer", chave: false, obrigatorio: true, campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, removeDisabled: true, configDisabled: true },
+      { campo: "ficheiro", tipo: "texto", chave: false, obrigatorio: true, campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, removeDisabled: true, configDisabled: true },
+      { campo: "ficheiropath", tipo: "texto", chave: false, obrigatorio: false, onList: false, campoDisabled: true, tipoDisabled: true, chaveDisabled: true, obrigatorioDisabled: true, onListDisabled: true, removeDisabled: true, configDisabled: true }
+    ],
+    getFinalSchema: getFinalSchema_ThemeTypeTable,
+    validateThemeFields: validateThemeFields_GeomList
   },
   // == RASTERLIST ============================= 
   rasterlist: { 
@@ -426,7 +541,8 @@ export const NT_ThemeTypes = {
     jsSchema: _NT_ThemeTypeTable.jsSchema,
     uiSchema: _NT_ThemeTypeTable.uiSchema,
     defaultFields: [],
-    getFinalSchema: getFinalSchema_ThemeTypeTable
+    getFinalSchema: getFinalSchema_ThemeTypeTable,
+    validateThemeFields: validateThemeFields_GeomList
   },
   // == FROMWMS ============================= 
   fromwms: {

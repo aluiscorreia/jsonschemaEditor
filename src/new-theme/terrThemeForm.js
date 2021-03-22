@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Form from '@rjsf/bootstrap-4'
-import { NT_ThemeTypes, NT_JSSchema, NT_UISchema, NT_ThemesFldDatatypesLabels } from './terrSchemasDefs'
+import { NT_ThemeTypes, NT_JSSchema, NT_UISchema, NT_ThemesFldDatatypesLabels, NT_FldDatatypesProps } from './terrSchemasDefs'
 import { NTwidgets } from './terrThemeWidgets'
 import { ListFieldAsTableTemplate } from './terrThemeTemplates'
 import './terrThemeForm.css'
 
 // ========================================================================
 // Form to create a new theme/layer
-function TerrThemeForm({formData: formDataIn, groupName, onChange, onSubmit, ...props }) {
+function TerrThemeForm({formData: formDataIn, groupName, themesFK, onChange, onSubmit, ...props }) {
   const [rjsfData, set_rjsfData] = useState(() => { 
     const tmp_JSSchema = Object.assign({}, NT_JSSchema)
     tmp_JSSchema.description = "Formulário de apoio à criação de novo conjunto de dados" + (groupName ? " no grupo '" + groupName + "'" : "")
@@ -26,37 +26,10 @@ function TerrThemeForm({formData: formDataIn, groupName, onChange, onSubmit, ...
   // })
   // DELETE ?? const [errorModalShow, setErrorModalShow] = useState(false)
 
-  // /**
-  //  * Create the final JSON Schema for the new theme (in final format to be inserted in database)
-  //  * @param {*} title_form 
-  //  * @param {*} dataFields 
-  //  */
-  // function createJSSchemaForNewTheme(title_form, dataFields) {
-  //   const templixo = { texto: "string", inteiro: "integer"}
-  //   const fldprops = dataFields.reduce((obj, field) => {
-  //     const fieldDef = {
-  //       type: templixo[field.tipo]
-  //     }
-  //     if (field.chave) fieldDef.database = { "primaryKey": true }
-  //     return {
-  //       ...obj,
-  //       [field.campo]: Object.assign(fieldDef, field.specific || {})
-  //     };
-  //   }, {})
-  //   return {
-  //     type: "object",
-  //     title: title_form,
-  //     properties: fldprops
-  //   }
-  // }
-
-  // /**
-  //  * Create the final UI Schema for the new theme (in final format to be inserted in database)
-  //  * @param {*} dataFields 
-  //  */
-  // function createUISchemaForNewTheme(dataFields) {
-  //   return { }
-  // }
+  useEffect(() => {
+    console.log('mounted the component terrThemeForm with inicialization');
+    NT_FldDatatypesProps.foreignKey.themesFK = themesFK
+  }, [themesFK])
 
   /**
    * Executed on Click on Submit butto
@@ -168,7 +141,7 @@ function TerrThemeForm({formData: formDataIn, groupName, onChange, onSubmit, ...
         showErrorList={false}
         onChange={(event) => _onChange(event) }
         formContext={{ actualThemeType: actualThemeType }}
-        onError={(errors) => console.log("I have", errors.length, "errors to fix")} //{console.error}
+        onError={(errors) => false} //{console.error}
         ArrayFieldTemplate={ListFieldAsTableTemplate}
         onSubmit={(data)=>_processSubmit(data.formData)}
         validate={validateForm}

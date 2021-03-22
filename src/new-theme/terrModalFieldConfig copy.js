@@ -33,46 +33,26 @@ const init_FldDatatypesConfig = (fldType) => {
 }
 
 export function FieldConfigForm(props) {
-  const [validElement, setValidElement] = useState(false)
   const [FCF_data, setFCF_data] = useState({
     formData: {}, 
-    schema: {},
-    uiSchema: {}
+    schema: {}
   })
 
   useEffect(() => {
-    const element = props.element
-    let valido = element && element.children.props.formData
-      && element.children.props.formData[NT_nomeCampo] && element.children.props.formData[NT_nomeCampo].length >= 4
-      && element.children.props.formData[NT_tipoCampo]
-      && element.children.props.schema
-      && element.children.props.uiSchema
-      && NT_FldDatatypesConfig[element.children.props.formData[NT_tipoCampo]]
-    if (valido) {
-      init_FldDatatypesConfig(element.children.props.formData[NT_tipoCampo])
-      formDataInput = props.element.children.props.formData
-    }
-    valido = valido ? true : false
-
-    setValidElement(valido)
-
-    if (valido)
+    console.log("USE EFFECT " + props.element)
+    if (props.element)
       setFCF_data({
         formData: formDataInput.specific, 
-        schema: getDatatypeSchema(formDataInput[NT_tipoCampo]),
-        uiSchema: getDatatypeUiSchema(formDataInput[NT_tipoCampo])
+        schema: getDatatypeSchema(formDataInput[NT_tipoCampo])
       })
   }, [props.element])
 
   const handleSubmit = ({ formData }, event) => {
     event.preventDefault()
     // event.stopPropagations()
-    setFCF_data({
-      formData: formData, 
-      schema: FCF_data.schema,
-      uiSchema: FCF_data.uiSchema
-    })
+
     props.element.children.props.onChange(Object.assign(formDataInput, { specific: formData }))
+    fldDatatypesConfig = null // Clear the local variable
     props.onHide()
   }
 
@@ -83,7 +63,7 @@ export function FieldConfigForm(props) {
      && NT_FldDatatypesConfig[element.children.props.formData[NT_tipoCampo]] === undefined
   }
 
-  /* function isValidElement(element) {
+  function isValidElement(element) {
     // TODO complete ?? 
     console.log("INIT ModalFieldConfig - function isValidElement(element)")
     const valido = element && element.children.props.formData
@@ -96,17 +76,19 @@ export function FieldConfigForm(props) {
       init_FldDatatypesConfig(element.children.props.formData[NT_tipoCampo])
       formDataInput = props.element.children.props.formData
     }
-    return valido ? true : false
-  } */
+    return valido
+  }
 
   function getDatatypeSchema(tipoCampo) {
     let schemaNew = Object.assign({}, fldDatatypesConfig.jsSchema)
     schemaNew.required = fldDatatypesConfig.requiredProps
+
     return schemaNew
   }
 
   function getDatatypeUiSchema(tipoCampo) {
     let uiSchemaNew = Object.assign({}, fldDatatypesConfig.uiSchema)
+
     return uiSchemaNew
   } 
 
@@ -134,7 +116,7 @@ console.log("===============> setFCF_data")
 
   if (!props.show)
     return null
-  else if (!validElement)
+  else if (!isValidElement(props.element))
     return (
       <Modal
         // {...props}
@@ -176,6 +158,10 @@ console.log("===============> setFCF_data")
         size="lg"
         aria-labelledby="contained-modal-title-vcenter"
         centered
+        //onEnter    = { function(){ console.log( "onEnter   " ); console.log( props ) }}
+      // onEntering = { function(){ console.log( "onEntering" ) }}
+        //onEntered  = { function(){ console.log( "onEntered " ) }}
+        // onSubmit = {props.onSubmit}
       >
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
@@ -196,8 +182,11 @@ console.log("===============> setFCF_data")
           <Form
             className={"rjsf-newTheme-FldConfig"}
             schema={FCF_data.schema} // DELETE ? {props.element && getDatatypeSchema(formDataInput[NT_tipoCampo])}
-            uiSchema={FCF_data.uiSchema} // DELETE ? {props.element && getDatatypeUiSchema(formDataInput[NT_tipoCampo])}
+            uiSchema={props.element && getDatatypeUiSchema(formDataInput[NT_tipoCampo])}
             formData={FCF_data.formData} // DELETE ? {props.element && formDataInput.specific}
+            /* schema={props.element && getDatatypeSchema(formDataInput[NT_tipoCampo])}
+            uiSchema={props.element && getDatatypeUiSchema(formDataInput[NT_tipoCampo])}
+            formData={props.element && formDataInput.specific} */
             onChange={handleOnChange}
             validate={validateFields}
             showErrorList={false}
