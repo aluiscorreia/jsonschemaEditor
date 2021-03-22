@@ -42,7 +42,7 @@ function TerrThemeForm({ formData: formDataIn, groupName, themesFK, onChange, on
     ret.data_type = dataForm.theme_type
     ret.description = dataForm.desc_theme
     ret.name_table = dataForm.code_table.toLowerCase()
-    const aux = NT_ThemeTypes[dataForm.theme_type].getFinalSchema(dataForm.title_form, dataForm.description_form, dataForm.theme_fields)
+    const aux = NT_ThemeTypes[dataForm.theme_type].getFinalSchema(dataForm.theme_type, dataForm.title_form, dataForm.description_form, dataForm.theme_fields)
     Object.assign(ret, aux)
 
     onSubmit(ret)
@@ -118,7 +118,8 @@ function TerrThemeForm({ formData: formDataIn, groupName, themesFK, onChange, on
    */
   function transformFormErrors(errors) {
     return errors.map(error => {
-      const prop = rjsfData.schema.properties[error.property.slice(1)]
+      let prop = rjsfData.schema.properties[error.property.slice(1)]
+      if (!prop) prop = rjsfData.schema.properties.theme_fields.items.properties[error.property.slice(1).split(".")[1]]
       if (prop && prop.transformError)
         error = prop.transformError(error)
       return error

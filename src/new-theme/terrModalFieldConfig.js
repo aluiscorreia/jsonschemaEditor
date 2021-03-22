@@ -13,7 +13,7 @@ let formDataInput = null
 
 let fldDatatypesConfig = null
 
-const init_FldDatatypesConfig = (fldType) => { 
+const init_FldDatatypesConfig = (fldType, formData) => { 
   fldDatatypesConfig = {}
   fldDatatypesConfig.jsSchema = { 
     title: "Características específicas do campo",
@@ -24,7 +24,7 @@ const init_FldDatatypesConfig = (fldType) => {
   fldDatatypesConfig.validateField = {}
   fldDatatypesConfig.requiredProps = NT_FldDatatypesConfig[fldType].requiredProps
   NT_FldDatatypesConfig[fldType].properties.forEach(fldProp => {
-    if (NT_FldDatatypesProps[fldProp].initField) NT_FldDatatypesProps[fldProp].initField(fldType)
+    if (NT_FldDatatypesProps[fldProp].initField) NT_FldDatatypesProps[fldProp].initField(fldType, formData.specific)
     fldDatatypesConfig.jsSchema.properties[fldProp] = NT_FldDatatypesProps[fldProp].jsSchema
     fldDatatypesConfig.uiSchema[fldProp] = NT_FldDatatypesProps[fldProp].uiSchema
     fldDatatypesConfig.validateField[fldProp] = NT_FldDatatypesProps[fldProp].validateField
@@ -43,14 +43,14 @@ export function FieldConfigForm(props) {
   useEffect(() => {
     const element = props.element
     let valido = element && element.children.props.formData
-      && element.children.props.formData[NT_nomeCampo] && element.children.props.formData[NT_nomeCampo].length >= 4
+      && element.children.props.formData[NT_nomeCampo] && element.children.props.formData[NT_nomeCampo].length >= 2
       && element.children.props.formData[NT_tipoCampo]
       && element.children.props.schema
       && element.children.props.uiSchema
       && NT_FldDatatypesConfig[element.children.props.formData[NT_tipoCampo]]
     if (valido) {
-      init_FldDatatypesConfig(element.children.props.formData[NT_tipoCampo])
       formDataInput = props.element.children.props.formData
+      init_FldDatatypesConfig(formDataInput[NT_tipoCampo], formDataInput)
     }
     valido = valido ? true : false
 
@@ -83,22 +83,6 @@ export function FieldConfigForm(props) {
      && NT_FldDatatypesConfig[element.children.props.formData[NT_tipoCampo]] === undefined
   }
 
-  /* function isValidElement(element) {
-    // TODO complete ?? 
-    console.log("INIT ModalFieldConfig - function isValidElement(element)")
-    const valido = element && element.children.props.formData
-      && element.children.props.formData[NT_nomeCampo] && element.children.props.formData[NT_nomeCampo].length >= 4
-      && element.children.props.formData[NT_tipoCampo]
-      && element.children.props.schema
-      && element.children.props.uiSchema
-      && NT_FldDatatypesConfig[element.children.props.formData[NT_tipoCampo]]
-    if (valido) {
-      init_FldDatatypesConfig(element.children.props.formData[NT_tipoCampo])
-      formDataInput = props.element.children.props.formData
-    }
-    return valido ? true : false
-  } */
-
   function getDatatypeSchema(tipoCampo) {
     let schemaNew = Object.assign({}, fldDatatypesConfig.jsSchema)
     schemaNew.required = fldDatatypesConfig.requiredProps
@@ -115,7 +99,6 @@ export function FieldConfigForm(props) {
       if (event.formData.foreignKey && event.formData.foreignKey.fkTable) {
         const schema = cloneDeep(FCF_data.schema)
         NT_FldDatatypesProps[NT_FldDatatypesPropsFK].initFieldDspFld(event.formData.foreignKey.fkTable, schema.properties.foreignKey)
-console.log("===============> setFCF_data")
         setFCF_data({
           formData: event.formData, 
           schema: schema,
