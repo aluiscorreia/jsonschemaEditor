@@ -532,7 +532,7 @@ const defaultFields_GeomList = (isRaster) => {
 }
 
 const toRsjfSchemaProps_GeomList = (isRaster) => { 
-  return {
+  cont tmp = {
     srs: {
       database: {
           foreignKey: {
@@ -542,7 +542,7 @@ const toRsjfSchemaProps_GeomList = (isRaster) => {
           }
       }
     },
-    imagetype: !isRaster ? undefined : {
+    imagetype: {
       database: {
           foreignKey: {
             field: "image_type",
@@ -559,6 +559,8 @@ const toRsjfSchemaProps_GeomList = (isRaster) => {
       }
     }
   }
+  if (!isRaster) delete tmp.imagetype
+  return tmp
 }
 // ========================================================================
 // Theme type configuration that can be useed in theme definition (different for fromwms)
