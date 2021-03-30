@@ -170,7 +170,7 @@ export const NT_FldDatatypesProps = {
         tabFld.enum.push(tab)
         tabFld.enumNames.push(prop.desc_table)
       })
-      if (formData[NT_FldDatatypesPropsFK] && formData[NT_FldDatatypesPropsFK].fkTable)
+      if (formData && formData[NT_FldDatatypesPropsFK] && formData[NT_FldDatatypesPropsFK].fkTable)
         NT_FldDatatypesProps[NT_FldDatatypesPropsFK].initFieldDspFld(formData[NT_FldDatatypesPropsFK].fkTable, NT_FldDatatypesProps.foreignKey.jsSchema)
     },
     initFieldDspFld: (fkTable, fkSchema) => {
@@ -532,7 +532,7 @@ const defaultFields_GeomList = (isRaster) => {
 }
 
 const toRsjfSchemaProps_GeomList = (isRaster) => { 
-  cont tmp = {
+  const tmp = {
     srs: {
       database: {
           foreignKey: {
@@ -587,7 +587,7 @@ export const NT_ThemeTypes = {
     uiSchema: _NT_ThemeTypeTable.uiSchema,
     defaultFields: [
       { campo: undefined, tipo: "texto", chave: true, obrigatorio: true, removeDisabled: true },
-      { campo: "geom", tipo: "geometry", chave: false, obrigatorio: true, chaveDisabled: true, tipoDisabled: true, onListDisabled: true, removeDisabled: true }
+      { campo: "geom", tipo: "geometry", chave: false, obrigatorio: true, onList: false, chaveDisabled: true, tipoDisabled: true, onListDisabled: true, removeDisabled: true }
     ],
     getFinalSchema: getFinalSchema_ThemeTypeTable,
     validateThemeFields: validateThemeFields_alfaGeom
